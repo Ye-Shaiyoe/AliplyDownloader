@@ -1,2 +1,76 @@
-CLAUDE.md
-target/
+# Node.js
+node_modules/
+dist/
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+profile_*
+ipython_config.py
+
+# pytest
+.pytest_cache/
+
+# coverage
+.coverage
+htmlcov/
+.tox/
+
+# distribution
+dist/
+build/
+*.egg-info/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.cache/
+.Trash/
+.gem/
+.bundle/
+*.bak
+
+# Testing
+.coverage
+.coverage.*
+.pytest_cache/
+htmlcov/
+.tox/
+
+# Environment variables
+.env
+.venv
+.conda
+.env.production
+.env.development
+
+# Large files
+*.mp4
+*.mkv
+*.avi
+*.flv
+GEMINI.md

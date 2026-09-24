@@ -1,92 +1,70 @@
-# AliplyDownloader
+# 🚀 AliplyDownloader
 
-CLI downloader berbasis Rust untuk video YouTube dan ekstraksi audio MP3.
+**AliplyDownloader** adalah web application gratis dan tanpa login untuk mengunduh video dan mengonversi video ke musik (MP3 / Audio) dari **Instagram Reels**, **TikTok (Tanpa Watermark)**, dan **YouTube (Video & Shorts)**.
 
-> Versi saat ini adalah MVP YouTube. Dukungan TikTok dan Instagram belum diaktifkan.
+Dibuat dengan UI modern bernuansa *Futuristic Dark Glassmorphism* yang elegan, minimalis, dan responsif.
 
-## Dependency
+---
 
-AliplyDownloader menggunakan dua program eksternal:
+## ✨ Fitur Utama
 
-- [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) untuk metadata dan download.
-- [`FFmpeg`](https://ffmpeg.org/) untuk menggabungkan stream video/audio dan mengubah audio ke MP3.
+- 📸 **Instagram Reels Downloader**: Download Reels dalam kualitas HD.
+- 🎵 **TikTok Video & Sound**: Unduh video TikTok tanpa watermark dan ekstrak audio latar belakang.
+- ▶️ **YouTube Video & MP3**: Download MP4 (Best Quality / 720p) atau langsung convert ke MP3 (320kbps High Quality).
+- 🔓 **100% Free & No Login**: Langsung pakai tanpa registrasi atau batasan akun.
+- 📋 **Auto Paste & Auto-Platform Detect**: Mendeteksi platform target secara otomatis saat link ditempel.
+- ⚡ **High Performance**: Didukung oleh engine `yt-dlp` dan `ffmpeg`.
 
-Keduanya harus tersedia di `PATH`.
+---
 
-Contoh instalasi:
+## 🛠️ Tech Stack
 
-### Linux
+- **Backend**: Node.js & Express.js
+- **Frontend**: React + Vite + Lucide Icons + Modern Vanilla CSS Glassmorphism
+- **Media Engine**: `yt-dlp` & `ffmpeg`
 
-```bash
-# Debian/Ubuntu
-sudo apt install ffmpeg yt-dlp
+---
 
-# Alternatif jika yt-dlp tidak tersedia di package manager
-python3 -m pip install -U yt-dlp
-```
+## 🚀 Cara Menjalankan
 
-### macOS
-
-```bash
-brew install ffmpeg yt-dlp
-```
-
-### Windows
-
-```powershell
-winget install yt-dlp.yt-dlp
-winget install Gyan.FFmpeg.Shared
-```
-
-Pastikan dependency terdeteksi:
-
+### 1. Prasyarat Sistem
+Pastikan `Node.js`, `yt-dlp`, dan `ffmpeg` telah terpasang di sistem:
 ```bash
 yt-dlp --version
 ffmpeg -version
+node -v
 ```
 
-## Menjalankan dari source
-
+### 2. Menjalankan Aplikasi
 ```bash
-cargo run -- "https://www.youtube.com/watch?v=VIDEO_ID"
+# Menjalankan server aplikasi (Production mode)
+npm start
+
+# Atau menjalankan mode development dengan hot-reloading
+npm run dev
 ```
 
-Jika URL tidak diberikan sebagai argument, aplikasi akan memintanya melalui prompt:
+Buka browser Anda di:
+👉 **`http://localhost:5000`** (atau `http://localhost:3000` pada mode dev)
 
-```bash
-cargo run
+---
+
+## 📁 Struktur Direktori
+
 ```
-
-Folder output default adalah folder `Downloads` user aktif. Folder tujuan dapat diubah:
-
-```bash
-cargo run -- --output-dir ./downloads "https://youtu.be/VIDEO_ID"
+VIdeoDownloader/
+├── backend/
+│   ├── src/
+│   │   ├── downloader.js    # Engine ekstraksi & konversi media (yt-dlp & ffmpeg)
+│   │   └── server.js        # Express API & static server
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx          # Interactive UI & platform detection
+│   │   ├── index.css        # Futuristic Glassmorphic Design System
+│   │   └── main.jsx
+│   ├── vite.config.js
+│   └── package.json
+├── package.json             # Root runner scripts
+└── GEMINI.md
 ```
-
-## Pilihan download
-
-- **Best quality MP4**: kualitas video terbaik yang tersedia, dengan audio jika diperlukan.
-- **Normal quality MP4**: kualitas hingga 720p.
-- **Audio MP3**: ekstrak audio dengan kualitas 192K.
-- **Cancel**: membatalkan proses.
-
-## Build release
-
-```bash
-cargo build --release
-```
-
-Binary tersedia di `target/release/aliply-downloader`.
-
-## Testing
-
-```bash
-cargo check
-cargo test
-```
-
-## Catatan
-
-- Gunakan tool ini hanya untuk konten yang boleh Anda download dan sesuai dengan hak cipta serta ketentuan layanan platform.
-- `yt-dlp` perlu diperbarui secara berkala karena platform dapat mengubah mekanisme ekstraksi.
-- Video yang memerlukan login atau bersifat private belum menjadi bagian dari MVP.

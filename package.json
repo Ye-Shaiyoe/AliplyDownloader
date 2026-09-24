@@ -1,0 +1,28 @@
+{
+  "name": "aliplydownloader",
+  "version": "1.0.0",
+  "description": "AliplyDownloader - Free Video Downloader & Music Converter for Instagram, TikTok, and YouTube",
+  "main": "backend/src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "video-downloader",
+    "music-converter",
+    "youtube-downloader",
+    "tiktok-downloader",
+    "instagram-reels-downloader",
+    "yt-dlp",
+    "ffmpeg"
+  ],
+  "author": "AliplyDownloader",
+  "license": "MIT"
+}
