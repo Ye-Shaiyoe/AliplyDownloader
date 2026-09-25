@@ -1,4 +1,4 @@
-# 🚀 AliplyDownloader
+#  AliplyDownloader
 
 **AliplyDownloader** adalah web application gratis dan tanpa login untuk mengunduh video dan mengonversi video ke musik (MP3 / Audio) dari **Instagram Reels**, **TikTok (Tanpa Watermark)**, dan **YouTube (Video & Shorts)**.
 
