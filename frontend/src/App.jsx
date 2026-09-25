@@ -1,55 +1,132 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Download, 
-  Music, 
-  Video, 
-  Link as LinkIcon, 
-  Clipboard, 
-  X, 
-  Loader2, 
-  Sparkles, 
-  ShieldCheck, 
-  Zap, 
-  CheckCircle2, 
-  AlertCircle,
-  Play
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Download,
+  Music,
+  Video,
+  Link2,
+  Clipboard,
+  X,
+  Loader2,
+  AlertTriangle,
+  Play,
+  Shield,
+  Zap,
+  ChevronRight
 } from 'lucide-react';
 
-function App() {
-  const [url, setUrl] = useState('');
-  const [detectedPlatform, setDetectedPlatform] = useState('all');
-  const [loading, setLoading] = useState(false);
-  const [downloadingId, setDownloadingId] = useState(null);
-  const [mediaInfo, setMediaInfo] = useState(null);
-  const [error, setError] = useState('');
+// Platform icon SVGs — minimal, no emoji
+const IconInstagram = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+    <circle cx="12" cy="12" r="4"/>
+    <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+  </svg>
+);
 
-  // Detect platform automatically as user types or pastes
+const IconTikTok = () => (
+  <svg width="12" height="13" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.19a8.16 8.16 0 0 0 4.77 1.52V6.26a4.85 4.85 0 0 1-1-.57z"/>
+  </svg>
+);
+
+const IconYouTube = () => (
+  <svg width="14" height="11" viewBox="0 0 24 18" fill="currentColor">
+    <path d="M23.5 2.5a3 3 0 0 0-2.1-2.1C19.5 0 12 0 12 0S4.5 0 2.6.4a3 3 0 0 0-2.1 2.1A31 31 0 0 0 0 9a31 31 0 0 0 .5 6.5A3 3 0 0 0 2.6 17.6C4.5 18 12 18 12 18s7.5 0 9.4-.4a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 9a31 31 0 0 0-.5-6.5zM9.8 12.8V5.2L15.8 9l-6 3.8z"/>
+  </svg>
+);
+
+const PLATFORMS = [
+  { id: 'instagram', label: 'Instagram',  Icon: IconInstagram, match: 'instagram.com/' },
+  { id: 'tiktok',   label: 'TikTok',     Icon: IconTikTok,   match: 'tiktok.com/' },
+  { id: 'youtube',  label: 'YouTube',    Icon: IconYouTube,  match: ['youtube.com/', 'youtu.be/'] },
+];
+
+const FORMATS = [
+  {
+    id: 'video-best',
+    type: 'video',
+    label: 'Best Quality',
+    sub: 'MP4 — full resolution',
+    wellClass: 'well-video',
+    Icon: Video,
+  },
+  {
+    id: 'video-720',
+    type: 'video',
+    label: 'HD 720p',
+    sub: 'MP4 — balanced size',
+    wellClass: 'well-video',
+    Icon: Video,
+  },
+  {
+    id: 'audio-mp3',
+    type: 'audio',
+    label: 'MP3 Audio',
+    sub: '320 kbps — high fidelity',
+    wellClass: 'well-audio',
+    Icon: Music,
+    isAudio: true,
+  },
+  {
+    id: 'audio-m4a',
+    type: 'audio',
+    label: 'M4A / AAC',
+    sub: 'AAC codec — device native',
+    wellClass: 'well-audio',
+    Icon: Music,
+    isAudio: true,
+  },
+];
+
+function detectPlatform(url) {
+  const u = url.toLowerCase();
+  for (const p of PLATFORMS) {
+    const matches = Array.isArray(p.match) ? p.match : [p.match];
+    if (matches.some((m) => u.includes(m))) return p.id;
+  }
+  return null;
+}
+
+function platformLabel(id) {
+  const map = {
+    instagram: 'Instagram Reel',
+    tiktok:    'TikTok Video',
+    youtube:   'YouTube',
+  };
+  return map[id] || 'Online Video';
+}
+
+export default function App() {
+  const [url, setUrl]                   = useState('');
+  const [activePlatform, setActivePlatform] = useState('instagram');
+  const [detectedPlatform, setDetectedPlatform] = useState(null);
+  const [loading, setLoading]           = useState(false);
+  const [downloading, setDownloading]   = useState(null);
+  const [mediaInfo, setMediaInfo]       = useState(null);
+  const [error, setError]               = useState('');
+  const inputRef = useRef(null);
+
+  // Detect platform from URL as user types
   useEffect(() => {
-    if (!url) {
-      setDetectedPlatform('all');
+    if (!url.trim()) {
+      setDetectedPlatform(null);
       return;
     }
-    const clean = url.toLowerCase();
-    if (clean.includes('instagram.com/')) {
-      setDetectedPlatform('instagram');
-    } else if (clean.includes('tiktok.com/')) {
-      setDetectedPlatform('tiktok');
-    } else if (clean.includes('youtube.com/') || clean.includes('youtu.be/')) {
-      setDetectedPlatform('youtube');
-    } else {
-      setDetectedPlatform('other');
-    }
+    const detected = detectPlatform(url);
+    setDetectedPlatform(detected);
+    if (detected) setActivePlatform(detected);
   }, [url]);
 
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      if (text) {
+      if (text.trim()) {
         setUrl(text.trim());
         setError('');
+        setMediaInfo(null);
       }
-    } catch (err) {
-      console.warn('Clipboard read failed:', err);
+    } catch {
+      // Clipboard API not available — silently ignore
     }
   };
 
@@ -57,13 +134,15 @@ function App() {
     setUrl('');
     setMediaInfo(null);
     setError('');
-    setDetectedPlatform('all');
+    setDetectedPlatform(null);
+    inputRef.current?.focus();
   };
 
-  const handleFetchInfo = async (e) => {
+  const handleFetch = async (e) => {
     if (e) e.preventDefault();
-    if (!url.trim()) {
-      setError('Silakan masukkan URL Instagram, TikTok, atau YouTube terlebih dahulu.');
+    const trimmed = url.trim();
+    if (!trimmed) {
+      setError('Paste a URL to get started.');
       return;
     }
 
@@ -72,296 +151,287 @@ function App() {
     setMediaInfo(null);
 
     try {
-      const response = await fetch('/api/info', {
+      const res = await fetch('/api/info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() })
+        body: JSON.stringify({ url: trimmed }),
       });
-
-      const data = await response.json();
-      if (data.success && data.data) {
+      const data = await res.json();
+      if (data.success) {
         setMediaInfo(data.data);
       } else {
-        setError(data.error || 'Gagal memproses URL tersebut. Pastikan link aktif dan publik.');
+        setError(data.error || 'Could not process this URL. Check that the video is public.');
       }
-    } catch (err) {
-      console.error(err);
-      setError('Terjadi kendala jaringan saat menghubungi server downloader.');
+    } catch {
+      setError('Network error. Is the server running?');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownload = (format) => {
-    setDownloadingId(format.id);
-    const downloadUrl = `/api/download?url=${encodeURIComponent(mediaInfo.originalUrl)}&type=${format.type}&quality=${format.id === 'audio-m4a' ? 'm4a' : (format.id === 'video-720' ? '720' : (format.type === 'audio' ? 'mp3' : 'best'))}&title=${encodeURIComponent(mediaInfo.title)}`;
+  const handleDownload = (fmt) => {
+    if (!mediaInfo) return;
+    setDownloading(fmt.id);
 
-    // Create an invisible anchor tag to trigger browser download
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', '');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const quality =
+      fmt.id === 'audio-m4a' ? 'm4a' :
+      fmt.id === 'video-720' ? '720'  :
+      fmt.type === 'audio'   ? 'mp3'  : 'best';
 
-    setTimeout(() => {
-      setDownloadingId(null);
-    }, 4000);
+    const href = `/api/download?url=${encodeURIComponent(mediaInfo.originalUrl)}&type=${fmt.type}&quality=${quality}&title=${encodeURIComponent(mediaInfo.title)}`;
+    const a = document.createElement('a');
+    a.href = href;
+    a.setAttribute('download', '');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => setDownloading(null), 4500);
   };
 
   return (
-    <div className="app-wrapper">
-      {/* Dynamic Ambient Glows */}
-      <div className="bg-ambient-lights">
-        <div className="ambient-blob-1"></div>
-        <div className="ambient-blob-2"></div>
-        <div className="ambient-blob-3"></div>
-      </div>
+    <div className="app-shell">
 
-      {/* Header */}
+      {/* ─── Header ─── */}
       <header className="app-header">
-        <a href="/" className="brand-logo" id="brand-logo">
-          <div className="logo-badge">
-            <Download />
+        <a href="/" className="brand" id="brand-logo">
+          <div className="brand-icon">
+            <Download size={16} />
           </div>
-          <span className="brand-name">
+          <span className="brand-text">
             Aliply<span>Downloader</span>
           </span>
         </a>
-
-        <div className="header-badge" id="free-badge">
-          <span className="header-badge-dot"></span>
-          100% Free & No Login
-        </div>
+        <span className="free-badge" id="free-label">100% FREE</span>
       </header>
 
-      {/* Main Content Area */}
-      <main className="main-content">
-        <div className="hero-text">
-          <div className="hero-pill">
-            <Sparkles size={14} color="#a855f7" />
-            <span>Smart Video Extractor & Audio Converter</span>
-          </div>
-          <h1 className="hero-title">
-            Download Video & Convert ke <span className="gradient-text">Musik Bebas</span>
+      <div className="content-column">
+
+        {/* ─── Hero ─── */}
+        <section className="hero">
+          <h1 className="hero-heading">
+            Download video.<br />
+            Extract <em>audio</em>.
           </h1>
-          <p className="hero-desc">
-            Unduh video berkualitas tinggi dan ekstrak audio MP3 dari Instagram Reels, TikTok, dan YouTube tanpa batas & tanpa registrasi.
+          <p className="hero-sub">
+            Works with Instagram Reels, TikTok, and YouTube. No account. No watermark. No limits.
           </p>
+        </section>
+
+        {/* ─── Platform Tab Switcher ─── */}
+        <div className="platform-switcher" role="tablist" aria-label="Select platform">
+          {PLATFORMS.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              role="tab"
+              id={`tab-${id}`}
+              aria-selected={activePlatform === id}
+              className={`platform-tab ${activePlatform === id ? 'active' : ''}`}
+              onClick={() => {
+                setActivePlatform(id);
+                setError('');
+              }}
+            >
+              <Icon />
+              {label}
+            </button>
+          ))}
         </div>
 
-        {/* Platform Indicators */}
-        <div className="platform-chips">
-          <div className={`platform-chip instagram ${detectedPlatform === 'instagram' ? 'active' : ''}`}>
-            <span>📸 Instagram Reels</span>
-          </div>
-          <div className={`platform-chip tiktok ${detectedPlatform === 'tiktok' ? 'active' : ''}`}>
-            <span>🎵 TikTok (No WM)</span>
-          </div>
-          <div className={`platform-chip youtube ${detectedPlatform === 'youtube' ? 'active' : ''}`}>
-            <span>▶️ YouTube Video & Shorts</span>
-          </div>
-        </div>
-
-        {/* Input Box Card */}
-        <div className="downloader-box">
-          <form onSubmit={handleFetchInfo} className="input-container">
-            <div className="input-icon">
-              <LinkIcon size={20} />
-            </div>
-            <input
-              id="url-input"
-              type="url"
-              className="url-input"
-              placeholder="Tempel tautan video Instagram Reels, TikTok, atau YouTube..."
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              disabled={loading}
-              autoComplete="off"
-            />
-            <div className="input-actions">
+        {/* ─── Main Downloader Panel ─── */}
+        <div className="downloader-panel">
+          <form onSubmit={handleFetch}>
+            {/* URL Input Slot */}
+            <div className="input-row">
+              <div className="input-slot-icon">
+                <Link2 size={14} />
+              </div>
+              <input
+                ref={inputRef}
+                id="url-input"
+                type="url"
+                className="url-field"
+                placeholder={`Paste ${activePlatform} URL here...`}
+                value={url}
+                onChange={(e) => { setUrl(e.target.value); setError(''); }}
+                disabled={loading}
+                autoComplete="off"
+                spellCheck="false"
+              />
               {url ? (
                 <button
                   type="button"
                   id="btn-clear"
-                  onClick={handleClear}
                   className="btn-clear"
-                  title="Hapus"
+                  onClick={handleClear}
+                  aria-label="Clear"
                 >
-                  <X size={15} />
+                  <X size={12} />
                 </button>
               ) : (
                 <button
                   type="button"
                   id="btn-paste"
-                  onClick={handlePaste}
                   className="btn-paste"
-                  title="Tempel dari Clipboard"
+                  onClick={handlePaste}
                 >
-                  <Clipboard size={14} />
-                  <span>Paste</span>
+                  <Clipboard size={11} />
+                  Paste
                 </button>
               )}
-              <button
-                type="submit"
-                id="btn-fetch"
-                className="btn-fetch"
-                disabled={loading || !url.trim()}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={18} className="spinner" />
-                    <span>Memproses...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Proses Link</span>
-                  </>
-                )}
-              </button>
             </div>
+
+            {/* Error */}
+            {error && (
+              <div className="error-row" id="error-message" style={{ marginTop: '0.6rem' }}>
+                <AlertTriangle size={13} />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* CTA */}
+            <button
+              type="submit"
+              id="btn-fetch"
+              className="btn-primary"
+              disabled={loading || !url.trim()}
+              style={{ marginTop: '0.75rem' }}
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={14} className="spin" />
+                  Fetching info...
+                </>
+              ) : (
+                <>
+                  <ChevronRight size={14} />
+                  Get Download Options
+                </>
+              )}
+            </button>
           </form>
+        </div>
 
-          {/* Error Notice */}
-          {error && (
-            <div className="error-alert" id="error-message">
-              <AlertCircle size={18} />
-              <span>{error}</span>
-            </div>
-          )}
+        {/* ─── Result Card ─── */}
+        {mediaInfo && (
+          <div className="result-panel" id="result-panel">
 
-          {/* Media Info & Download Options Card */}
-          {mediaInfo && (
-            <div className="media-preview-card" id="media-preview">
-              <div className="media-header">
-                <div className="thumbnail-wrapper">
-                  {mediaInfo.thumbnail ? (
-                    <img 
-                      src={mediaInfo.thumbnail} 
-                      alt={mediaInfo.title} 
-                      className="thumbnail-img" 
-                      crossOrigin="anonymous"
-                    />
-                  ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b' }}>
-                      <Play size={28} />
-                    </div>
-                  )}
-                  {mediaInfo.duration && (
-                    <span className="duration-tag">{mediaInfo.duration}</span>
-                  )}
-                </div>
-
-                <div className="media-details">
-                  <span className="media-platform-badge">
-                    {mediaInfo.platform === 'instagram' ? 'Instagram Reel' :
-                     mediaInfo.platform === 'tiktok' ? 'TikTok Video' :
-                     mediaInfo.platform === 'youtube' ? 'YouTube Media' : 'Online Video'}
-                  </span>
-                  <h3 className="media-title" title={mediaInfo.title}>
-                    {mediaInfo.title}
-                  </h3>
-                  <div className="media-author">
-                    <span>Oleh: {mediaInfo.author}</span>
+            {/* Media Header */}
+            <div className="result-header">
+              <div className="thumb-slot">
+                {mediaInfo.thumbnail ? (
+                  <img
+                    src={mediaInfo.thumbnail}
+                    alt={mediaInfo.title}
+                    crossOrigin="anonymous"
+                  />
+                ) : (
+                  <div className="thumb-placeholder">
+                    <Play size={22} />
                   </div>
+                )}
+                {mediaInfo.duration && (
+                  <span className="duration-chip">{mediaInfo.duration}</span>
+                )}
+              </div>
+
+              <div className="result-meta">
+                <span className="result-platform-label">
+                  {platformLabel(mediaInfo.platform)}
+                </span>
+                <div className="result-title" title={mediaInfo.title}>
+                  {mediaInfo.title}
                 </div>
+                <div className="result-author">{mediaInfo.author}</div>
               </div>
+            </div>
 
-              {/* Download Buttons Section */}
-              <div className="download-options-grid">
-                {mediaInfo.formats.map((fmt) => {
-                  const isAudio = fmt.type === 'audio';
-                  const isDownloading = downloadingId === fmt.id;
-
-                  return (
-                    <div key={fmt.id} className="download-option-card">
-                      <div className="option-info">
-                        <div className={`option-icon-box ${isAudio ? 'audio' : 'video'}`}>
-                          {isAudio ? <Music size={18} /> : <Video size={18} />}
-                        </div>
-                        <div>
-                          <div className="option-title">{fmt.quality}</div>
-                          <div className="option-sub">
-                            {isAudio ? 'Format Audio High Bitrate' : 'Format Video MP4'}
-                          </div>
-                        </div>
+            {/* Format Rows */}
+            <div className="formats-list">
+              {FORMATS.map((fmt) => {
+                const isDownloading = downloading === fmt.id;
+                return (
+                  <div key={fmt.id} className="format-row">
+                    <div className="format-left">
+                      <div className={`format-icon-well ${fmt.wellClass}`}>
+                        <fmt.Icon size={14} />
                       </div>
-
-                      <button
-                        onClick={() => handleDownload(fmt)}
-                        disabled={isDownloading}
-                        className={`btn-download-action ${isAudio ? 'audio-btn' : ''}`}
-                        id={`btn-download-${fmt.id}`}
-                      >
-                        {isDownloading ? (
-                          <>
-                            <Loader2 size={15} className="spinner" />
-                            <span>Mengunduh...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Download size={15} />
-                            <span>Unduh</span>
-                          </>
-                        )}
-                      </button>
+                      <div>
+                        <div className="format-name">{fmt.label}</div>
+                        <div className="format-sub">{fmt.sub}</div>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+
+                    <button
+                      id={`btn-dl-${fmt.id}`}
+                      className={`btn-download ${fmt.isAudio ? 'btn-download-audio' : ''}`}
+                      onClick={() => handleDownload(fmt)}
+                      disabled={isDownloading}
+                    >
+                      {isDownloading ? (
+                        <>
+                          <Loader2 size={11} className="spin" />
+                          Wait
+                        </>
+                      ) : (
+                        <>
+                          <Download size={11} />
+                          Save
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
+        )}
+
+        {/* ─── Feature Cards ─── */}
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feat-icon-well feat-well-green">
+              <Shield size={15} />
+            </div>
+            <div className="feat-text">
+              <div className="feat-title">No account required</div>
+              <div className="feat-desc">Paste and download. Zero signup friction.</div>
+            </div>
+          </div>
+
+          <div className="feature-card">
+            <div className="feat-icon-well feat-well-purple">
+              <Music size={15} />
+            </div>
+            <div className="feat-text">
+              <div className="feat-title">Audio extraction</div>
+              <div className="feat-desc">Convert any video to MP3 or M4A instantly.</div>
+            </div>
+          </div>
+
+          <div className="feature-card">
+            <div className="feat-icon-well feat-well-amber">
+              <Zap size={15} />
+            </div>
+            <div className="feat-text">
+              <div className="feat-title">yt-dlp engine</div>
+              <div className="feat-desc">Always-updated. No broken links, no expiry.</div>
+            </div>
+          </div>
         </div>
 
-        {/* Features Highlights */}
-        <section className="features-section">
-          <div className="feature-box">
-            <div className="feature-icon-wrapper purple">
-              <ShieldCheck size={22} />
-            </div>
-            <h3 className="feature-title">Tanpa Akun / Login</h3>
-            <p className="feature-desc">
-              Nikmati kebebasan mendownload langsung tanpa perlu membuat akun, berlangganan, atau membagikan kredensial.
-            </p>
-          </div>
+      </div>
 
-          <div className="feature-box">
-            <div className="feature-icon-wrapper cyan">
-              <Music size={22} />
-            </div>
-            <h3 className="feature-title">Convert Video ke Musik</h3>
-            <p className="feature-desc">
-              Otomatis ekstrak dan konversi lagu latar, sound Reels, atau klip TikTok ke format MP3 320kbps jernih.
-            </p>
-          </div>
-
-          <div className="feature-box">
-            <div className="feature-icon-wrapper rose">
-              <Zap size={22} />
-            </div>
-            <h3 className="feature-title">Super Cepat & Bebas</h3>
-            <p className="feature-desc">
-              Didukung oleh engine yt-dlp & ffmpeg untuk kecepatan konversi dan kualitas unduhan terbaik.
-            </p>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
+      {/* ─── Footer ─── */}
       <footer className="app-footer">
-        <div>
-          © 2026 <strong>AliplyDownloader</strong>. All rights reserved.
-        </div>
-        <div className="footer-links">
-          <span>Instagram Reels</span>
-          <span>•</span>
+        <span>AliplyDownloader</span>
+        <div className="footer-platforms">
+          <span>Instagram</span>
           <span>TikTok</span>
-          <span>•</span>
           <span>YouTube</span>
         </div>
       </footer>
+
     </div>
   );
 }
-
-export default App;
