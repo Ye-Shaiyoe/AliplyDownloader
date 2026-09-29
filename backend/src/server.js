@@ -16,7 +16,7 @@ app.use(express.json());
 
 // API: Get Video / Audio Info
 app.post('/api/info', async (req, res) => {
-  const { url } = req.body;
+  const { url, platform: requestedPlatform } = req.body;
 
   if (!url || typeof url !== 'string') {
     return res.status(400).json({ success: false, error: 'URL is required' });
@@ -24,6 +24,12 @@ app.post('/api/info', async (req, res) => {
 
   const cleanUrl = url.trim();
   const platform = identifyPlatform(cleanUrl);
+  if (!['instagram', 'tiktok', 'youtube'].includes(requestedPlatform) || platform !== requestedPlatform) {
+    return res.status(400).json({
+      success: false,
+      error: 'The URL does not match the selected platform.'
+    });
+  }
 
   try {
     const info = await getVideoInfo(cleanUrl);
@@ -39,14 +45,19 @@ app.post('/api/info', async (req, res) => {
 
 // API: Download Media (Video / Audio)
 app.get('/api/download', async (req, res) => {
-  const { url, type = 'video', quality = 'best', title = 'media' } = req.query;
+  const { url, platform: requestedPlatform, type = 'video', quality = 'best', title = 'media' } = req.query;
 
-  if (!url) {
+  if (!url || typeof url !== 'string') {
     return res.status(400).send('URL is required');
   }
 
   try {
     const cleanUrl = decodeURIComponent(url);
+    if (!['instagram', 'tiktok', 'youtube'].includes(requestedPlatform)
+      || identifyPlatform(cleanUrl) !== requestedPlatform) {
+      return res.status(400).send('The URL does not match the selected platform.');
+    }
+
     const downloadResult = await downloadMedia(cleanUrl, type, quality);
     const { filePath, ext } = downloadResult;
 
