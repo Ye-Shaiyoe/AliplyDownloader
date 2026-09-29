@@ -29,10 +29,19 @@ setInterval(() => {
 
 export function identifyPlatform(url) {
   if (!url || typeof url !== 'string') return 'unknown';
-  const cleanUrl = url.trim().toLowerCase();
-  if (cleanUrl.includes('instagram.com/')) return 'instagram';
-  if (cleanUrl.includes('tiktok.com/')) return 'tiktok';
-  if (cleanUrl.includes('youtube.com/') || cleanUrl.includes('youtu.be/')) return 'youtube';
+  let hostname;
+  try {
+    const parsedUrl = new URL(url.trim());
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') return 'unknown';
+    hostname = parsedUrl.hostname.toLowerCase().replace(/\.$/, '');
+  } catch {
+    return 'unknown';
+  }
+
+  const matchesDomain = (domain) => hostname === domain || hostname.endsWith(`.${domain}`);
+  if (matchesDomain('instagram.com')) return 'instagram';
+  if (matchesDomain('tiktok.com')) return 'tiktok';
+  if (matchesDomain('youtube.com') || matchesDomain('youtu.be')) return 'youtube';
   return 'general';
 }
 
