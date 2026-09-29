@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Download,
   Music,
@@ -36,9 +36,9 @@ const IconYouTube = () => (
 );
 
 const PLATFORMS = [
-  { id: 'instagram', label: 'Instagram',  Icon: IconInstagram, match: 'instagram.com/' },
-  { id: 'tiktok',   label: 'TikTok',     Icon: IconTikTok,   match: 'tiktok.com/' },
-  { id: 'youtube',  label: 'YouTube',    Icon: IconYouTube,  match: ['youtube.com/', 'youtu.be/'] },
+  { id: 'instagram', label: 'Instagram', Icon: IconInstagram },
+  { id: 'tiktok', label: 'TikTok', Icon: IconTikTok },
+  { id: 'youtube', label: 'YouTube', Icon: IconYouTube },
 ];
 
 const FORMATS = [
@@ -79,10 +79,20 @@ const FORMATS = [
 ];
 
 function detectPlatform(url) {
-  const u = url.toLowerCase();
-  for (const p of PLATFORMS) {
-    const matches = Array.isArray(p.match) ? p.match : [p.match];
-    if (matches.some((m) => u.includes(m))) return p.id;
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') return null;
+    const hostname = parsedUrl.hostname.toLowerCase().replace(/\.$/, '');
+    for (const platform of PLATFORMS) {
+      const domains = platform.id === 'youtube'
+        ? ['youtube.com', 'youtu.be']
+        : [`${platform.id}.com`];
+      if (domains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`))) {
+        return platform.id;
+      }
+    }
+  } catch {
+    return null;
   }
   return null;
 }
@@ -99,23 +109,11 @@ function platformLabel(id) {
 export default function App() {
   const [url, setUrl]                   = useState('');
   const [activePlatform, setActivePlatform] = useState('instagram');
-  const [detectedPlatform, setDetectedPlatform] = useState(null);
   const [loading, setLoading]           = useState(false);
   const [downloading, setDownloading]   = useState(null);
   const [mediaInfo, setMediaInfo]       = useState(null);
   const [error, setError]               = useState('');
   const inputRef = useRef(null);
-
-  // Detect platform from URL as user types
-  useEffect(() => {
-    if (!url.trim()) {
-      setDetectedPlatform(null);
-      return;
-    }
-    const detected = detectPlatform(url);
-    setDetectedPlatform(detected);
-    if (detected) setActivePlatform(detected);
-  }, [url]);
 
   const handlePaste = async () => {
     try {
@@ -134,7 +132,6 @@ export default function App() {
     setUrl('');
     setMediaInfo(null);
     setError('');
-    setDetectedPlatform(null);
     inputRef.current?.focus();
   };
 
@@ -146,6 +143,18 @@ export default function App() {
       return;
     }
 
+    const detectedPlatform = detectPlatform(trimmed);
+    if (detectedPlatform !== activePlatform) {
+      const selectedPlatform = PLATFORMS.find(({ id }) => id === activePlatform)?.label;
+      setMediaInfo(null);
+      setError(
+        detectedPlatform
+          ? `This URL belongs to ${platformLabel(detectedPlatform)}. Select the ${platformLabel(detectedPlatform)} tab to continue.`
+          : `Enter a valid ${selectedPlatform} URL to continue.`,
+      );
+      return;
+    }
+
     setLoading(true);
     setError('');
     setMediaInfo(null);
@@ -154,7 +163,7 @@ export default function App() {
       const res = await fetch('/api/info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: trimmed }),
+        body: JSON.stringify({ url: trimmed, platform: activePlatform }),
       });
       const data = await res.json();
       if (data.success) {
@@ -178,7 +187,7 @@ export default function App() {
       fmt.id === 'video-720' ? '720'  :
       fmt.type === 'audio'   ? 'mp3'  : 'best';
 
-    const href = `/api/download?url=${encodeURIComponent(mediaInfo.originalUrl)}&type=${fmt.type}&quality=${quality}&title=${encodeURIComponent(mediaInfo.title)}`;
+    const href = `/api/download?url=${encodeURIComponent(mediaInfo.originalUrl)}&platform=${activePlatform}&type=${fmt.type}&quality=${quality}&title=${encodeURIComponent(mediaInfo.title)}`;
     const a = document.createElement('a');
     a.href = href;
     a.setAttribute('download', '');
@@ -230,6 +239,7 @@ export default function App() {
               onClick={() => {
                 setActivePlatform(id);
                 setError('');
+                setMediaInfo(null);
               }}
             >
               <Icon />
@@ -253,7 +263,7 @@ export default function App() {
                 className="url-field"
                 placeholder={`Paste ${activePlatform} URL here...`}
                 value={url}
-                onChange={(e) => { setUrl(e.target.value); setError(''); }}
+                onChange={(e) => { setUrl(e.target.value); setError(''); setMediaInfo(null); }}
                 disabled={loading}
                 autoComplete="off"
                 spellCheck="false"
