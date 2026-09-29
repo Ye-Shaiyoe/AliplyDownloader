@@ -81,15 +81,16 @@ body {
 
 .app-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 1.25rem;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
 }
 
 .content-column {
   width: 100%;
-  max-width: 560px;
+  max-width: 840px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -104,7 +105,7 @@ body {
   justify-content: space-between;
   padding: 1.5rem 0 2.25rem;
   width: 100%;
-  max-width: 560px;
+  max-width: 840px;
 }
 
 .brand {
@@ -161,7 +162,7 @@ body {
 }
 
 .hero-heading {
-  font-size: 1.65rem;
+  font-size: clamp(1.65rem, 4vw, 2.5rem);
   font-weight: 800;
   color: var(--text-heading);
   letter-spacing: -0.5px;
@@ -200,13 +201,13 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  padding: 0.55rem 0.5rem;
+  padding: 0.7rem 0.75rem;
   border-radius: 10px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-tab-idle);
   font-family: var(--font);
-  font-size: 0.73rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   cursor: pointer;
@@ -289,7 +290,7 @@ body {
   border: none;
   outline: none;
   font-family: var(--font);
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--text-label);
   padding: 0.8rem 0.25rem;
   caret-color: var(--text-accent);
@@ -359,6 +360,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  min-height: 46px;
   padding: 0.8rem 1.5rem;
   background: var(--bg-btn-primary);
   border: 1px solid var(--border-btn);
@@ -555,6 +557,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .format-icon-well {
@@ -723,7 +726,7 @@ body {
 .app-footer {
   padding: 1.25rem 0;
   width: 100%;
-  max-width: 560px;
+  max-width: 840px;
   border-top: 1px solid var(--border-base);
   display: flex;
   align-items: center;
@@ -741,12 +744,13 @@ body {
 
 /* ─── Responsive ─── */
 
-@media (max-width: 480px) {
+@media (max-width: 800px) {
   .features-grid {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
+@media (max-width: 520px) {
   .feature-card {
     flex-direction: row;
     align-items: center;
@@ -756,6 +760,160 @@ body {
 
   .feat-text {
     flex: 1;
+    min-width: 0;
+  }
+
+  .app-shell {
+    padding-inline: 1rem;
+  }
+
+  .app-header {
+    padding: 1.1rem 0 1.5rem;
+  }
+
+  .content-column {
+    padding: 1.5rem 0 2rem;
+  }
+
+  .hero {
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-sub {
+    font-size: 0.9rem;
+  }
+
+  .platform-switcher {
+    gap: 3px;
+  }
+
+  .platform-tab {
+    gap: 0.35rem;
+    padding: 0.7rem 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .downloader-panel {
+    padding: 0.9rem;
+  }
+
+  .input-slot-icon {
+    padding-inline: 0.6rem;
+  }
+
+  .url-field {
+    min-width: 0;
+    padding-block: 0.9rem;
+  }
+
+  .btn-paste {
+    min-height: 36px;
+    padding-inline: 0.6rem;
+  }
+
+  .result-header {
+    gap: 0.75rem;
+    padding: 0.85rem;
+  }
+
+  .thumb-slot {
+    width: 96px;
+    height: 64px;
+  }
+
+  .format-row {
+    gap: 0.65rem;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .format-sub {
+    line-height: 1.4;
+  }
+
+  .btn-download {
+    padding-inline: 0.7rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .app-footer {
+    gap: 0.75rem;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 360px) {
+  .app-shell {
+    padding-inline: 0.75rem;
+  }
+
+  .brand {
+    gap: 0.45rem;
+  }
+
+  .brand-text {
+    font-size: 0.85rem;
+  }
+
+  .free-badge {
+    padding-inline: 0.55rem;
+  }
+
+  .platform-tab {
+    gap: 0.25rem;
+    font-size: 0.68rem;
+  }
+
+  .downloader-panel {
+    padding: 0.7rem;
+  }
+
+  .input-slot-icon {
+    padding-inline: 0.45rem;
+  }
+
+  .btn-paste {
+    gap: 0.2rem;
+    padding-inline: 0.45rem;
+    font-size: 0.66rem;
+  }
+
+  .result-header {
+    align-items: flex-start;
+  }
+
+  .thumb-slot {
+    width: 78px;
+    height: 58px;
+  }
+
+  .format-row {
+    padding-inline: 0.65rem;
+  }
+
+  .format-left {
+    gap: 0.5rem;
+  }
+
+  .format-name {
+    font-size: 0.72rem;
+  }
+
+  .format-sub {
+    font-size: 0.62rem;
+  }
+
+  .btn-download {
+    gap: 0.25rem;
+    padding-inline: 0.55rem;
+  }
+
+  .footer-platforms {
+    gap: 0.6rem;
   }
 
   .platform-tab {
