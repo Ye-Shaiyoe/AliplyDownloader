@@ -2,7 +2,7 @@
 
 **AliplyDownloader** adalah web application gratis dan tanpa login untuk mengunduh video dan mengonversi video ke musik (MP3 / Audio) dari **Instagram Reels**, **TikTok (Tanpa Watermark)**, dan **YouTube (Video & Shorts)**.
 
-Dibuat dengan UI modern bernuansa *Futuristic Dark Glassmorphism* yang elegan, minimalis, dan responsif.
+Dibuat dengan UI bernuansa *High-Premium Frutiger Aero* yang segar, elegan, berkontras tinggi, dan responsif (Aqua Glassmorphism, specular highlights, and vibrant nature-tech colors).
 
 ---
 

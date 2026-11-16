@@ -11,34 +11,36 @@ import {
   Play,
   Shield,
   Zap,
-  ChevronRight
+  Sparkles,
+  ArrowRight,
+  Check
 } from 'lucide-react';
 
-// Platform icon SVGs — minimal, no emoji
+// Platform SVG Icons with crisp skeuomorphic contours
 const IconInstagram = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
     <circle cx="12" cy="12" r="4"/>
-    <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+    <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/>
   </svg>
 );
 
 const IconTikTok = () => (
-  <svg width="12" height="13" viewBox="0 0 24 24" fill="currentColor">
+  <svg width="14" height="15" viewBox="0 0 24 24" fill="currentColor">
     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.19a8.16 8.16 0 0 0 4.77 1.52V6.26a4.85 4.85 0 0 1-1-.57z"/>
   </svg>
 );
 
 const IconYouTube = () => (
-  <svg width="14" height="11" viewBox="0 0 24 18" fill="currentColor">
+  <svg width="16" height="13" viewBox="0 0 24 18" fill="currentColor">
     <path d="M23.5 2.5a3 3 0 0 0-2.1-2.1C19.5 0 12 0 12 0S4.5 0 2.6.4a3 3 0 0 0-2.1 2.1A31 31 0 0 0 0 9a31 31 0 0 0 .5 6.5A3 3 0 0 0 2.6 17.6C4.5 18 12 18 12 18s7.5 0 9.4-.4a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 9a31 31 0 0 0-.5-6.5zM9.8 12.8V5.2L15.8 9l-6 3.8z"/>
   </svg>
 );
 
 const PLATFORMS = [
-  { id: 'instagram', label: 'Instagram', Icon: IconInstagram },
-  { id: 'tiktok', label: 'TikTok', Icon: IconTikTok },
-  { id: 'youtube', label: 'YouTube', Icon: IconYouTube },
+  { id: 'instagram', label: 'Instagram', Icon: IconInstagram, tabClass: 'tab-instagram' },
+  { id: 'tiktok', label: 'TikTok', Icon: IconTikTok, tabClass: 'tab-tiktok' },
+  { id: 'youtube', label: 'YouTube', Icon: IconYouTube, tabClass: 'tab-youtube' },
 ];
 
 const FORMATS = [
@@ -46,24 +48,24 @@ const FORMATS = [
     id: 'video-best',
     type: 'video',
     label: 'Best Quality',
-    sub: 'MP4 — full resolution',
-    wellClass: 'well-video',
+    sub: 'MP4 • Full Resolution Video',
+    category: 'video',
     Icon: Video,
   },
   {
     id: 'video-720',
     type: 'video',
     label: 'HD 720p',
-    sub: 'MP4 — balanced size',
-    wellClass: 'well-video',
+    sub: 'MP4 • Fast & Balanced Size',
+    category: 'video',
     Icon: Video,
   },
   {
     id: 'audio-mp3',
     type: 'audio',
     label: 'MP3 Audio',
-    sub: '320 kbps — high fidelity',
-    wellClass: 'well-audio',
+    sub: '320 kbps • Studio High Fidelity',
+    category: 'audio',
     Icon: Music,
     isAudio: true,
   },
@@ -71,8 +73,8 @@ const FORMATS = [
     id: 'audio-m4a',
     type: 'audio',
     label: 'M4A / AAC',
-    sub: 'AAC codec — device native',
-    wellClass: 'well-audio',
+    sub: 'AAC Codec • Device Native',
+    category: 'audio',
     Icon: Music,
     isAudio: true,
   },
@@ -124,7 +126,7 @@ export default function App() {
         setMediaInfo(null);
       }
     } catch {
-      // Clipboard API not available — silently ignore
+      // Fallback or ignore if clipboard permission denied
     }
   };
 
@@ -139,7 +141,7 @@ export default function App() {
     if (e) e.preventDefault();
     const trimmed = url.trim();
     if (!trimmed) {
-      setError('Paste a URL to get started.');
+      setError('Tempel tautan video terlebih dahulu.');
       return;
     }
 
@@ -149,8 +151,8 @@ export default function App() {
       setMediaInfo(null);
       setError(
         detectedPlatform
-          ? `This URL belongs to ${platformLabel(detectedPlatform)}. Select the ${platformLabel(detectedPlatform)} tab to continue.`
-          : `Enter a valid ${selectedPlatform} URL to continue.`,
+          ? `Tautan ini milik ${platformLabel(detectedPlatform)}. Silakan pilih tab ${platformLabel(detectedPlatform)} di atas.`
+          : `Masukkan tautan ${selectedPlatform} yang valid untuk melanjutkan.`,
       );
       return;
     }
@@ -169,10 +171,10 @@ export default function App() {
       if (data.success) {
         setMediaInfo(data.data);
       } else {
-        setError(data.error || 'Could not process this URL. Check that the video is public.');
+        setError(data.error || 'Gagal memproses tautan. Pastikan video bersifat publik.');
       }
     } catch {
-      setError('Network error. Is the server running?');
+      setError('Koneksi terputus. Pastikan server backend sedang aktif.');
     } finally {
       setLoading(false);
     }
@@ -199,249 +201,301 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell">
-
-      {/* ─── Header ─── */}
-      <header className="app-header">
-        <a href="/" className="brand" id="brand-logo">
-          <div className="brand-icon">
-            <Download size={16} />
-          </div>
-          <span className="brand-text">
-            Aliply<span>Downloader</span>
-          </span>
-        </a>
-        <span className="free-badge" id="free-label">100% FREE</span>
-      </header>
-
-      <div className="content-column">
-
-        {/* ─── Hero ─── */}
-        <section className="hero">
-          <h1 className="hero-heading">
-            Download video.<br />
-            Extract <em>audio</em>.
-          </h1>
-          <p className="hero-sub">
-            Works with Instagram Reels, TikTok, and YouTube. No account. No watermark. No limits.
-          </p>
-        </section>
-
-        {/* ─── Platform Tab Switcher ─── */}
-        <div className="platform-switcher" role="tablist" aria-label="Select platform">
-          {PLATFORMS.map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              role="tab"
-              id={`tab-${id}`}
-              aria-selected={activePlatform === id}
-              className={`platform-tab ${activePlatform === id ? 'active' : ''}`}
-              onClick={() => {
-                setActivePlatform(id);
-                setError('');
-                setMediaInfo(null);
-              }}
-            >
-              <Icon />
-              {label}
-            </button>
-          ))}
+    <>
+      {/* ─── Frutiger Aero Atmosphere & Floating Glass Bubbles ─── */}
+      <div className="aero-background">
+        <div className="aero-light-ray" />
+        <div className="aero-bubble-container">
+          <div className="aero-bubble bubble-1" />
+          <div className="aero-bubble bubble-2" />
+          <div className="aero-bubble bubble-3" />
+          <div className="aero-bubble bubble-4" />
+          <div className="aero-bubble bubble-5" />
+          <div className="aero-bubble bubble-6" />
         </div>
-
-        {/* ─── Main Downloader Panel ─── */}
-        <div className="downloader-panel">
-          <form onSubmit={handleFetch}>
-            {/* URL Input Slot */}
-            <div className="input-row">
-              <div className="input-slot-icon">
-                <Link2 size={14} />
-              </div>
-              <input
-                ref={inputRef}
-                id="url-input"
-                type="url"
-                className="url-field"
-                placeholder={`Paste ${activePlatform} URL here...`}
-                value={url}
-                onChange={(e) => { setUrl(e.target.value); setError(''); setMediaInfo(null); }}
-                disabled={loading}
-                autoComplete="off"
-                spellCheck="false"
-              />
-              {url ? (
-                <button
-                  type="button"
-                  id="btn-clear"
-                  className="btn-clear"
-                  onClick={handleClear}
-                  aria-label="Clear"
-                >
-                  <X size={12} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  id="btn-paste"
-                  className="btn-paste"
-                  onClick={handlePaste}
-                >
-                  <Clipboard size={11} />
-                  Paste
-                </button>
-              )}
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="error-row" id="error-message" style={{ marginTop: '0.6rem' }}>
-                <AlertTriangle size={13} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {/* CTA */}
-            <button
-              type="submit"
-              id="btn-fetch"
-              className="btn-primary"
-              disabled={loading || !url.trim()}
-              style={{ marginTop: '0.75rem' }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={14} className="spin" />
-                  Fetching info...
-                </>
-              ) : (
-                <>
-                  <ChevronRight size={14} />
-                  Get Download Options
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* ─── Result Card ─── */}
-        {mediaInfo && (
-          <div className="result-panel" id="result-panel">
-
-            {/* Media Header */}
-            <div className="result-header">
-              <div className="thumb-slot">
-                {mediaInfo.thumbnail ? (
-                  <img
-                    src={mediaInfo.thumbnail}
-                    alt={mediaInfo.title}
-                    crossOrigin="anonymous"
-                  />
-                ) : (
-                  <div className="thumb-placeholder">
-                    <Play size={22} />
-                  </div>
-                )}
-                {mediaInfo.duration && (
-                  <span className="duration-chip">{mediaInfo.duration}</span>
-                )}
-              </div>
-
-              <div className="result-meta">
-                <span className="result-platform-label">
-                  {platformLabel(mediaInfo.platform)}
-                </span>
-                <div className="result-title" title={mediaInfo.title}>
-                  {mediaInfo.title}
-                </div>
-                <div className="result-author">{mediaInfo.author}</div>
-              </div>
-            </div>
-
-            {/* Format Rows */}
-            <div className="formats-list">
-              {FORMATS.map((fmt) => {
-                const isDownloading = downloading === fmt.id;
-                return (
-                  <div key={fmt.id} className="format-row">
-                    <div className="format-left">
-                      <div className={`format-icon-well ${fmt.wellClass}`}>
-                        <fmt.Icon size={14} />
-                      </div>
-                      <div>
-                        <div className="format-name">{fmt.label}</div>
-                        <div className="format-sub">{fmt.sub}</div>
-                      </div>
-                    </div>
-
-                    <button
-                      id={`btn-dl-${fmt.id}`}
-                      className={`btn-download ${fmt.isAudio ? 'btn-download-audio' : ''}`}
-                      onClick={() => handleDownload(fmt)}
-                      disabled={isDownloading}
-                    >
-                      {isDownloading ? (
-                        <>
-                          <Loader2 size={11} className="spin" />
-                          Wait
-                        </>
-                      ) : (
-                        <>
-                          <Download size={11} />
-                          Save
-                        </>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ─── Feature Cards ─── */}
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feat-icon-well feat-well-green">
-              <Shield size={15} />
-            </div>
-            <div className="feat-text">
-              <div className="feat-title">No account required</div>
-              <div className="feat-desc">Paste and download. Zero signup friction.</div>
-            </div>
-          </div>
-
-          <div className="feature-card">
-            <div className="feat-icon-well feat-well-purple">
-              <Music size={15} />
-            </div>
-            <div className="feat-text">
-              <div className="feat-title">Audio extraction</div>
-              <div className="feat-desc">Convert any video to MP3 or M4A instantly.</div>
-            </div>
-          </div>
-
-          <div className="feature-card">
-            <div className="feat-icon-well feat-well-amber">
-              <Zap size={15} />
-            </div>
-            <div className="feat-text">
-              <div className="feat-title">yt-dlp engine</div>
-              <div className="feat-desc">Always-updated. No broken links, no expiry.</div>
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      {/* ─── Footer ─── */}
-      <footer className="app-footer">
-        <span>AliplyDownloader</span>
-        <div className="footer-platforms">
-          <span>Instagram</span>
-          <span>TikTok</span>
-          <span>YouTube</span>
-        </div>
-      </footer>
+      <div className="app-shell">
 
-    </div>
+        {/* ─── Top Aero Glass Header ─── */}
+        <header className="app-header">
+          <a href="/" className="brand" id="brand-logo">
+            <div className="brand-icon-orb">
+              <Download size={18} strokeWidth={2.6} />
+            </div>
+            <span className="brand-text">
+              Aliply<span>Downloader</span>
+            </span>
+          </a>
+
+          <div className="free-badge-aero" id="free-label">
+            <span className="free-badge-dot" />
+            <span>100% FREE</span>
+          </div>
+        </header>
+
+        <div className="content-column">
+
+          {/* ─── Hero Section ─── */}
+          <section className="hero">
+            <div className="hero-pill-tag">
+              <Sparkles size={14} />
+              <span>Pure High-Definition Media Extractor</span>
+            </div>
+            <h1 className="hero-heading">
+              Download video.<br />
+              Extract <em>audio murni</em>.
+            </h1>
+            <p className="hero-sub">
+              Dukungan instan untuk Instagram Reels, TikTok tanpa watermark, dan YouTube MP4/MP3. Bebas batasan, tanpa registrasi.
+            </p>
+          </section>
+
+          {/* ─── Platform Selector Dock ─── */}
+          <div className="platform-dock-container">
+            <div className="platform-dock" role="tablist" aria-label="Select target platform">
+              {PLATFORMS.map(({ id, label, Icon, tabClass }) => (
+                <button
+                  key={id}
+                  role="tab"
+                  id={`tab-${id}`}
+                  aria-selected={activePlatform === id}
+                  className={`platform-dock-tab ${activePlatform === id ? `active ${tabClass}` : ''}`}
+                  onClick={() => {
+                    setActivePlatform(id);
+                    setError('');
+                    setMediaInfo(null);
+                  }}
+                >
+                  <Icon />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ─── Main Downloader Aero Glass Console ─── */}
+          <div className="aero-panel">
+            <div className="panel-header-ribbon">
+              <div className="panel-title">
+                <Link2 size={18} color="#0284c7" />
+                <span>Masukkan Tautan Media</span>
+              </div>
+              <span className="panel-title-badge">
+                Auto Detect: {platformLabel(activePlatform)}
+              </span>
+            </div>
+
+            <form onSubmit={handleFetch}>
+              <div className="input-dock">
+                <div className="input-icon-slot">
+                  <Link2 size={16} />
+                </div>
+                <input
+                  ref={inputRef}
+                  id="url-input"
+                  type="url"
+                  className="url-input-field"
+                  placeholder={`Tempel link ${activePlatform} di sini (cth: https://${activePlatform}.com/...)...`}
+                  value={url}
+                  onChange={(e) => { setUrl(e.target.value); setError(''); setMediaInfo(null); }}
+                  disabled={loading}
+                  autoComplete="off"
+                  spellCheck="false"
+                />
+                {url ? (
+                  <button
+                    type="button"
+                    id="btn-clear"
+                    className="btn-glass-pill"
+                    onClick={handleClear}
+                    aria-label="Bersihkan"
+                  >
+                    <X size={13} />
+                    <span>Hapus</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    id="btn-paste"
+                    className="btn-glass-pill"
+                    onClick={handlePaste}
+                  >
+                    <Clipboard size={13} />
+                    <span>Tempel</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="error-pill" id="error-message">
+                  <AlertTriangle size={16} />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* Primary Aqua Gel CTA */}
+              <button
+                type="submit"
+                id="btn-fetch"
+                className="btn-aero-primary"
+                disabled={loading || !url.trim()}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="spin" />
+                    <span>Menganalisis Media...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={18} />
+                    <span>Dapatkan Pilihan Unduhan</span>
+                    <ArrowRight size={17} />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* ─── Result Media Showcase Panel ─── */}
+          {mediaInfo && (
+            <div className="result-panel" id="result-panel">
+              {/* Media Card Header */}
+              <div className="result-showcase">
+                <div className="thumb-frame">
+                  {mediaInfo.thumbnail ? (
+                    <img
+                      src={mediaInfo.thumbnail}
+                      alt={mediaInfo.title}
+                      className="thumb-image"
+                      crossOrigin="anonymous"
+                    />
+                  ) : (
+                    <div className="thumb-placeholder">
+                      <Play size={28} />
+                    </div>
+                  )}
+                  {mediaInfo.duration && (
+                    <span className="duration-aero-chip">{mediaInfo.duration}</span>
+                  )}
+                </div>
+
+                <div className="result-info">
+                  <div className="result-badge-row">
+                    <span className={`platform-pill-badge ${mediaInfo.platform || activePlatform}`}>
+                      {platformLabel(mediaInfo.platform || activePlatform)}
+                    </span>
+                    <span className="hero-pill-tag" style={{ padding: '0.2rem 0.6rem', fontSize: '0.74rem' }}>
+                      <Check size={12} color="#10b981" />
+                      Siap Diunduh
+                    </span>
+                  </div>
+                  <h2 className="result-title" title={mediaInfo.title}>
+                    {mediaInfo.title}
+                  </h2>
+                  <div className="result-author">
+                    Dipublikasikan oleh: <strong>{mediaInfo.author || 'Kreator Konten'}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Formats Grid */}
+              <div className="formats-header-label">
+                <Download size={15} />
+                <span>Pilih Format & Kualitas:</span>
+              </div>
+
+              <div className="formats-grid">
+                {FORMATS.map((fmt) => {
+                  const isDownloading = downloading === fmt.id;
+                  const isVideo = fmt.category === 'video';
+
+                  return (
+                    <div key={fmt.id} className="format-card">
+                      <div className="format-details">
+                        <div className={`format-icon-orb ${fmt.category}`}>
+                          <fmt.Icon size={18} />
+                        </div>
+                        <div>
+                          <div className="format-name">{fmt.label}</div>
+                          <div className="format-sub">{fmt.sub}</div>
+                        </div>
+                      </div>
+
+                      <button
+                        id={`btn-dl-${fmt.id}`}
+                        className={isVideo ? 'btn-aero-video' : 'btn-aero-audio'}
+                        onClick={() => handleDownload(fmt)}
+                        disabled={isDownloading}
+                      >
+                        {isDownloading ? (
+                          <>
+                            <Loader2 size={13} className="spin" />
+                            <span>Proses...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Download size={13} />
+                            <span>Download</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ─── Aero Desktop Gadget Feature Cards ─── */}
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feat-icon-orb emerald">
+                <Shield size={20} />
+              </div>
+              <div className="feat-content">
+                <div className="feat-title">Tanpa Registrasi</div>
+                <div className="feat-desc">Langsung tempel tautan dan unduh seketika tanpa perlu login akun atau data pribadi.</div>
+              </div>
+            </div>
+
+            <div className="feature-card">
+              <div className="feat-icon-orb cyan">
+                <Music size={20} />
+              </div>
+              <div className="feat-content">
+                <div className="feat-title">Ekstraksi Musik 320kbps</div>
+                <div className="feat-desc">Konversi video Reels, TikTok, atau Shorts ke MP3/M4A fidelitas tinggi dengan FFmpeg engine.</div>
+              </div>
+            </div>
+
+            <div className="feature-card">
+              <div className="feat-icon-orb amber">
+                <Zap size={20} />
+              </div>
+              <div className="feat-content">
+                <div className="feat-title">Engine yt-dlp Mutakhir</div>
+                <div className="feat-desc">Pembaruan rutin untuk stabilitas ekstraksi tanpa watermark dan tanpa limit kecepatan.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ─── Aero Glass Footer ─── */}
+        <footer className="app-footer">
+          <div>
+            <strong>AliplyDownloader</strong> • Futuristic Frutiger Aero Edition
+          </div>
+          <div className="footer-tags">
+            <span className="footer-pill-tag">yt-dlp Core</span>
+            <span className="footer-pill-tag">FFmpeg Audio</span>
+            <span className="footer-pill-tag">React 19 + Vite</span>
+          </div>
+        </footer>
+
+      </div>
+    </>
   );
 }
