@@ -34,7 +34,29 @@ yt-dlp --version
 ffmpeg -version
 node -v
 ```
+### Jika belum ada 
+```bash
+Arch base:
+sudo pacman -S nodejs npm yt-dlp ffmpeg
 
+Debian base:
+sudo apt-get install -y nodejs npm yt-dlp ffmpeg
+
+CentOS:
+sudo yum install -y nodejs npm yt-dlp ffmpeg
+
+Fedora base:
+sudo dnf install -y nodejs npm yt-dlp ffmpeg
+
+OpenSUSE:
+sudo zypper install -y nodejs npm yt-dlp ffmpeg
+
+Alpine LInux:
+sudo apk add nodejs npm yt-dlp ffmpeg
+
+Windows:
+winget install -e --id OpenJS.NodeJS.LTS && winget install -e --id yt-dlp.yt-dlp && winget install -e --id Gyan.FFmpeg
+```
 ### 2. Menjalankan Aplikasi
 ```bash
 # Menjalankan server aplikasi (Production mode)
